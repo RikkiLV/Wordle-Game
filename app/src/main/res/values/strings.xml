@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Wordle Game</string>
+    <string name="guess_word_label">Guess the word:</string>
+    <string name="enter_guess_hint">Enter your guess</string>
+    <string name="submit_button_label">Submit</string>
+    <string name="correct_guess_message">Correct guess!</string>
+    <string name="incorrect_guess_message">Incorrect guess. Try again.</string>
+    <string name="out_of_attempts_message">Out of attempts. Try again.</string>
+    <string name="attempts_left_message">Incorrect guess. Attempts left: %1$d</string>
+</resources>
