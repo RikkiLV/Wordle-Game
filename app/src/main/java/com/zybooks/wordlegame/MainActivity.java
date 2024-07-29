@@ -2,6 +2,7 @@ package com.zybooks.wordlegame;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private String targetWord;
     private ArrayList<String> previousGuesses;
 
+    private Dictionary dict;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,13 +37,16 @@ public class MainActivity extends AppCompatActivity {
         btnSubmitGuess = findViewById(R.id.btnSubmitGuess);
         tvResult = findViewById(R.id.tvResult);
         gridPreviousGuesses = findViewById(R.id.gridPreviousGuesses);
-
-        targetWord = generateRandomWord(); // Generate the hidden target word
+        // Init Dictionary
+        dict = new Dictionary(this);
+        targetWord = dict.returnRandomWord(); // Generate the hidden target word
+        Log.i("Wordle", targetWord);
 
         // Initialize GridView adapter and previousGuesses list
         previousGuesses = new ArrayList<>();
         gridAdapter = new ArrayAdapter<>(this, R.layout.grid_item, R.id.tvGridItem, previousGuesses);
         gridPreviousGuesses.setAdapter(gridAdapter);
+
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,17 +64,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private String generateRandomWord() {
-        String[] words = {"PLANE", "APPLE", "HOUSE", "TIGER", "MUSIC"};
-        Random random = new Random();
-        return words[random.nextInt(words.length)];
-    }
-
     private void checkGuess() {
         String userGuess = etGuessInput.getText().toString().toUpperCase();
 
         if (userGuess.length() != 5) {
             tvResult.setText("Please enter a 5-letter word.");
+            return;
+        }
+        else if (!dict.isValidWord(userGuess)) {
+            tvResult.setText("Invalid word.");
             return;
         }
 
