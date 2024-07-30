@@ -6,17 +6,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class GameFragment extends Fragment {
 
@@ -24,7 +23,7 @@ public class GameFragment extends Fragment {
     private Button btnSubmitGuess;
     private TextView tvResult;
     private GridView gridPreviousGuesses;
-    private ArrayAdapter<String> gridAdapter;
+    private GuessAdapter gridAdapter;
     private String targetWord;
     private ArrayList<String> previousGuesses;
     private Dictionary dict;
@@ -46,7 +45,7 @@ public class GameFragment extends Fragment {
 
         // Initialize GridView adapter and previousGuesses list
         previousGuesses = new ArrayList<>();
-        gridAdapter = new ArrayAdapter<>(getContext(), R.layout.grid_item, R.id.tvGridItem, previousGuesses);
+        gridAdapter = new GuessAdapter(getContext(), previousGuesses);
         gridPreviousGuesses.setAdapter(gridAdapter);
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
@@ -56,64 +55,63 @@ public class GameFragment extends Fragment {
             }
         });
 
-        gridPreviousGuesses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String previousGuess = previousGuesses.get(position);
-                etGuessInput.setText(previousGuess); // Set clicked item's text to input field
-            }
-        });
-
         return view;
     }
 
     //background thread to validate guess
-    private class ValidateGuessTask extends AsyncTask<String, Void, String> {
+    private class ValidateGuessTask extends AsyncTask<String, Void, String[]> {
 
         private String userGuess;
+        private String message;
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String[] doInBackground(String... params) {
             userGuess = params[0];
 
             if (userGuess.length() != 5) {
-                return "Please enter a 5-letter word.";
+                message = "Please enter a 5-letter word.";
+                return null;
             } else if (!dict.isValidWord(userGuess)) {
-                return "Invalid word.";
+                message = "Invalid word.";
+                return null;
             }
-
-            StringBuilder result = new StringBuilder();
-
+            message = null; // Reset message
+            String[] result = new String[5];
             for (int i = 0; i < 5; i++) {
                 char guessChar = userGuess.charAt(i);
                 char targetChar = targetWord.charAt(i);
 
                 if (guessChar == targetChar) {
-                    result.append(guessChar);
+                    result[i] = "green";
                 } else if (targetWord.contains(String.valueOf(guessChar))) {
-                    result.append("+");
+                    result[i] = "yellow";
                 } else {
-                    result.append("-");
+                    result[i] = "gray";
                 }
             }
 
-            return result.toString();
+            return result;
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            if (userGuess.length() == 5) {
-                for (int i = 0; i < 5; i++) {
-                    previousGuesses.add(String.valueOf(userGuess.charAt(i)));
-                }
-                gridAdapter.notifyDataSetChanged(); // Notify adapter of data change
+        protected void onPostExecute(String[] result) {
+
+            if (message != null) {
+                tvResult.setText(message);
+                etGuessInput.setText(""); // Clear input field for the next guess
+                return;
             }
 
-            tvResult.setText(result);
+            for (int i = 0; i < 5; i++) {
+                previousGuesses.add(userGuess.charAt(i) + ":" + result[i]);
+            }
+            gridAdapter.notifyDataSetChanged(); // Notify adapter of data change
 
-            if (result.equals(targetWord)) {
+            if (userGuess.equals(targetWord)) {
                 tvResult.setText("Congratulations! You guessed the word.");
                 btnSubmitGuess.setEnabled(false); // Disable submit button after winning
+            } else {
+                tvResult.setText("");
             }
 
             etGuessInput.setText(""); // Clear input field for the next guess
