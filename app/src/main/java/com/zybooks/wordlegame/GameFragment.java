@@ -3,9 +3,11 @@ package com.zybooks.wordlegame;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -55,7 +57,23 @@ public class GameFragment extends Fragment {
             }
         });
 
+
+        // Set OnEditorActionListener for Enter key handling
+        etGuessInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                submitGuess();
+                return true;
+            }
+            return false;
+        });
+
+
         return view;
+    }
+
+    private void submitGuess() {
+        String userGuess = etGuessInput.getText().toString().toUpperCase();
+        new ValidateGuessTask().execute(userGuess);
     }
 
     //background thread to validate guess
