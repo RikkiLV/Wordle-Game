@@ -17,4 +17,7 @@
     <color name="yellow">#FFFF00</color>
     <color name="gray">#CCCCCC</color>
 
+    <color name="edit_text_background_light">#FFFFFF</color>
+    <color name="edit_text_background_dark">#333333</color>
+
 </resources>

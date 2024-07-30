@@ -32,27 +32,27 @@
 
     <!-- Input field for guessing -->
 
-    <EditText
-        android:id="@+id/etGuessInput"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="61dp"
-        android:layout_toStartOf="@id/btnSubmitGuess"
-        android:layout_weight="1"
-        android:background="@android:color/white"
-        android:gravity="center"
-        android:hint="Enter your guess"
-        android:inputType="text"
-        android:maxLength="5"
-        android:maxLines="1"
-        android:textSize="18sp"
-        android:imeOptions="actionSend"/>
 
-    <!-- Button to submit the guess -->
+
+    <!-- Button to submit the guess --><EditText
+    android:id="@+id/etGuessInput"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginStart="30dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="61dp"
+    android:layout_toStartOf="@id/btnSubmitGuess"
+    android:layout_weight="1"
+    android:background="?attr/editTextBackground"
+    android:gravity="center"
+    android:hint="Enter your guess"
+    android:inputType="text"
+    android:maxLength="5"
+    android:maxLines="1"
+    android:textSize="18sp"
+    android:imeOptions="actionSend"/>
     <Button
         android:id="@+id/btnSubmitGuess"
         android:layout_width="wrap_content"
