@@ -58,7 +58,7 @@ public class GameFragment extends Fragment {
         });
 
 
-        // Set OnEditorActionListener for Enter key handling
+        // Enter key handling
         etGuessInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 submitGuess();
