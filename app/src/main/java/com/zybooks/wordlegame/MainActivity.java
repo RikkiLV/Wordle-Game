@@ -56,8 +56,12 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.action_reset) {
             GameFragment fragment = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
             if (fragment != null) {
-                fragment.ResetGame();
+                fragment.resetGame();
             }
+            return true;
+        } else if (id == R.id.action_stats) {
+            Intent intent = new Intent(this, StatsActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

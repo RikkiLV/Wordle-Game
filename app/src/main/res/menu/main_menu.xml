@@ -11,4 +11,9 @@
         android:icon="@android:drawable/ic_menu_revert"
         android:title="Reset"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_stats"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Stats"
+        app:showAsAction="always" />
 </menu>

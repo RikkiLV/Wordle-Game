@@ -29,4 +29,7 @@
     <string name="pref_title_theme">Dark Theme</string>
     <string name="pref_summary_theme">Enable dark theme</string>
 
+    <!-- Stats -->
+    <string name="stats">Stats</string>
+
 </resources>

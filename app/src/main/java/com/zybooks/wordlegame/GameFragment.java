@@ -13,7 +13,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,13 +28,21 @@ public class GameFragment extends Fragment {
     private GridView gridPreviousGuesses;
     private GuessAdapter gridAdapter;
     private String targetWord;
-    private ArrayList<String> previousGuesses;
     private Dictionary dict;
+
+
+    // Persisting Data
+    private long startTime;
+    private int attempts;
+    private WordleDatabase wordleDatabase;
+
     private static final String PREFS_NAME = "WordleGamePrefs";
     private static final String KEY_TARGET_WORD = "targetWord";
     private static final String KEY_PREVIOUS_GUESSES = "previousGuesses";
     private static final String KEY_INPUT_TEXT = "inputText";
+    private static final String KEY_START_TIME = "startTime";
 
+    private ArrayList<String> previousGuesses;
 
     @Nullable
     @Override
@@ -45,9 +52,10 @@ public class GameFragment extends Fragment {
         etGuessInput = view.findViewById(R.id.etGuessInput);
         btnSubmitGuess = view.findViewById(R.id.btnSubmitGuess);
         gridPreviousGuesses = view.findViewById(R.id.gridPreviousGuesses);
+        wordleDatabase = WordleDatabase.getDatabase(getContext());
 
         // Init
-        ResetGame();
+        resetGame();
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences.contains(KEY_TARGET_WORD)) {
@@ -56,6 +64,7 @@ public class GameFragment extends Fragment {
             String previousGuessesSerialized = sharedPreferences.getString(KEY_PREVIOUS_GUESSES, "");
             previousGuesses.addAll(deserializeGuesses(previousGuessesSerialized));
             etGuessInput.setText(sharedPreferences.getString(KEY_INPUT_TEXT, ""));
+            startTime = sharedPreferences.getLong(KEY_START_TIME, System.currentTimeMillis());
         }
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
@@ -74,7 +83,8 @@ public class GameFragment extends Fragment {
             return false;
         });
 
-
+        Log.i("Wordle", String.valueOf(startTime));
+        Log.i("Wordle", targetWord);
         return view;
     }
 
@@ -101,6 +111,8 @@ public class GameFragment extends Fragment {
                 message = "Invalid word.";
                 return null;
             }
+            // If reached valid guess given
+            ++attempts;
             String[] result = new String[5];
             boolean[] targetWordMatched = new boolean[5]; // Keep track of which letters in the target word have been matched
 
@@ -154,6 +166,9 @@ public class GameFragment extends Fragment {
             if (userGuess.equals(targetWord)) {
                 Toast.makeText(getContext(), "Congratulations! You guessed the word.", Toast.LENGTH_LONG).show();
                 btnSubmitGuess.setEnabled(false); // Disable submit button after winning
+                long endTime = System.currentTimeMillis();
+                long timeTaken = endTime - startTime;
+                saveGame(targetWord, timeTaken, attempts);
             }
 
             etGuessInput.setText(""); // Clear input field for the next guess
@@ -191,17 +206,20 @@ public class GameFragment extends Fragment {
         editor.putString(KEY_TARGET_WORD, targetWord);
         editor.putString(KEY_PREVIOUS_GUESSES, serializeGuesses(previousGuesses));
         editor.putString(KEY_INPUT_TEXT, etGuessInput.getText().toString());
+        editor.putLong(KEY_START_TIME, startTime);
 
         editor.apply();
     }
 
-    public void ResetGame(){
+    public void resetGame(){
         if (dict == null){
             dict = new Dictionary(getContext());
         }
         targetWord = dict.returnRandomWord(); // Generate the hidden target word
-        Log.i("Wordle", targetWord);
         previousGuesses = new ArrayList<>();
+        // SaveData reset
+        attempts = 0;
+        startTime = System.currentTimeMillis();
 
         // Adapter stuff
         if (gridAdapter == null){
@@ -213,7 +231,14 @@ public class GameFragment extends Fragment {
 
         gridPreviousGuesses.setAdapter(gridAdapter);
         gridAdapter.notifyDataSetChanged();
+        Log.i("Wordle", targetWord);
     }
 
+    private void saveGame(String targetWord, long timeTaken, int attempts) {
+        new Thread(() -> {
+            WordleGame game = new WordleGame(targetWord, timeTaken, attempts);
+            wordleDatabase.wordleGameDao().insert(game);
+        }).start();
+    }
 
 }
