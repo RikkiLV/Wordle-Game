@@ -70,6 +70,7 @@ public class GameFragment extends Fragment {
         return view;
     }
 
+    // Enter key handling
     private void submitGuess() {
         String userGuess = etGuessInput.getText().toString().toUpperCase();
         new ValidateGuessTask().execute(userGuess);
@@ -94,16 +95,35 @@ public class GameFragment extends Fragment {
             }
             message = null; // Reset message
             String[] result = new String[5];
+            boolean[] targetWordMatched = new boolean[5]; // Keep track of which letters in the target word have been matched
+
+            // First pass: Check for correct letters in correct positions (green)
             for (int i = 0; i < 5; i++) {
                 char guessChar = userGuess.charAt(i);
                 char targetChar = targetWord.charAt(i);
 
                 if (guessChar == targetChar) {
                     result[i] = "green";
-                } else if (targetWord.contains(String.valueOf(guessChar))) {
-                    result[i] = "yellow";
+                    targetWordMatched[i] = true;
                 } else {
-                    result[i] = "gray";
+                    result[i] = "gray"; // Initialize with gray, may change to yellow in second pass
+                }
+            }
+
+            // Second pass: Check for correct letters in wrong positions (yellow)
+            for (int i = 0; i < 5; i++) {
+                if (result[i].equals("green")) {
+                    continue;
+                }
+
+                char guessChar = userGuess.charAt(i);
+
+                for (int j = 0; j < 5; j++) {
+                    if (!targetWordMatched[j] && guessChar == targetWord.charAt(j)) {
+                        result[i] = "yellow";
+                        targetWordMatched[j] = true;
+                        break;
+                    }
                 }
             }
 
