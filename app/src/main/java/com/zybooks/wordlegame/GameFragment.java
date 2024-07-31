@@ -77,7 +77,9 @@ public class GameFragment extends Fragment {
         // Enter key handling
         etGuessInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                submitGuess();
+                if (btnSubmitGuess.isEnabled()){
+                    submitGuess();
+                }
                 return true;
             }
             return false;
@@ -151,7 +153,6 @@ public class GameFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String[] result) {
-
             if (message != null) {
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                 etGuessInput.setText(""); // Clear input field for the next guess
@@ -169,6 +170,12 @@ public class GameFragment extends Fragment {
                 long endTime = System.currentTimeMillis();
                 long timeTaken = endTime - startTime;
                 saveGame(targetWord, timeTaken, attempts);
+            }
+
+
+            if (attempts >= 6){
+                Toast.makeText(getContext(), "You've ran out of attempts, the word was " + targetWord, Toast.LENGTH_LONG).show();
+                btnSubmitGuess.setEnabled(false); // Disable submit button after winning
             }
 
             etGuessInput.setText(""); // Clear input field for the next guess
