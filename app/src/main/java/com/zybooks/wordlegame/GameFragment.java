@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class GameFragment extends Fragment {
 
@@ -48,28 +47,17 @@ public class GameFragment extends Fragment {
         tvResult = view.findViewById(R.id.tvResult);
         gridPreviousGuesses = view.findViewById(R.id.gridPreviousGuesses);
 
-        // Init Dictionary
-        dict = new Dictionary(getContext());
-        targetWord = dict.returnRandomWord(); // Generate the hidden target word
-        Log.i("Wordle", targetWord);
-
-        // Initialize GridView adapter and previousGuesses list
-        previousGuesses = new ArrayList<>();
+        // Init
+        ResetGame();
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences.contains(KEY_TARGET_WORD)) {
             // Restore saved state
             targetWord = sharedPreferences.getString(KEY_TARGET_WORD, "");
             String previousGuessesSerialized = sharedPreferences.getString(KEY_PREVIOUS_GUESSES, "");
-            previousGuesses = deserializeGuesses(previousGuessesSerialized);
+            previousGuesses.addAll(deserializeGuesses(previousGuessesSerialized));
             etGuessInput.setText(sharedPreferences.getString(KEY_INPUT_TEXT, ""));
-        } else {
-            // Generate a new target word
-            targetWord = dict.returnRandomWord();
         }
-        gridAdapter = new GuessAdapter(getContext(), previousGuesses);
-        gridPreviousGuesses.setAdapter(gridAdapter);
-        gridAdapter.notifyDataSetChanged();
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,7 +173,6 @@ public class GameFragment extends Fragment {
         return serialized.toString();
     }
 
-
     private ArrayList<String> deserializeGuesses(String serialized) {
         ArrayList<String> guesses = new ArrayList<>();
         String[] parts = serialized.split(",");
@@ -196,8 +183,6 @@ public class GameFragment extends Fragment {
         }
         return guesses;
     }
-
-
 
     @Override
     public void onPause() {
@@ -213,5 +198,26 @@ public class GameFragment extends Fragment {
 
         editor.apply();
     }
+
+    public void ResetGame(){
+        if (dict == null){
+            dict = new Dictionary(getContext());
+        }
+        targetWord = dict.returnRandomWord(); // Generate the hidden target word
+        Log.i("Wordle", targetWord);
+        previousGuesses = new ArrayList<>();
+
+        // Adapter stuff
+        if (gridAdapter == null){
+            gridAdapter = new GuessAdapter(getContext(), previousGuesses);
+        }
+        else {
+            gridAdapter.reset(previousGuesses);
+        }
+
+        gridPreviousGuesses.setAdapter(gridAdapter);
+        gridAdapter.notifyDataSetChanged();
+    }
+
 
 }

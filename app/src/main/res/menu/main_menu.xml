@@ -6,4 +6,9 @@
         android:icon="@drawable/setting"
         android:title="@string/settings"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_reset"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:title="Reset"
+        app:showAsAction="always" />
 </menu>

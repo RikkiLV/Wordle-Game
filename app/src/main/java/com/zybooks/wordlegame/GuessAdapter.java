@@ -18,6 +18,10 @@ public class GuessAdapter extends BaseAdapter {
         this.guesses = guesses;
     }
 
+    public void reset(ArrayList<String> newGuesses){
+        guesses = newGuesses;
+    }
+
     @Override
     public int getCount() {
         return guesses.size();

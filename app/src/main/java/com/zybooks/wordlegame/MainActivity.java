@@ -50,9 +50,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
+            return true;
+        } else if (id == R.id.action_reset) {
+            GameFragment fragment = (GameFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            if (fragment != null) {
+                fragment.ResetGame();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
