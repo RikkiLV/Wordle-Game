@@ -55,20 +55,20 @@ public class GameFragment extends Fragment {
 
         // Initialize GridView adapter and previousGuesses list
         previousGuesses = new ArrayList<>();
-        gridAdapter = new GuessAdapter(getContext(), previousGuesses);
-        gridPreviousGuesses.setAdapter(gridAdapter);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences.contains(KEY_TARGET_WORD)) {
             // Restore saved state
             targetWord = sharedPreferences.getString(KEY_TARGET_WORD, "");
-            previousGuesses.addAll(sharedPreferences.getStringSet(KEY_PREVIOUS_GUESSES, new HashSet<>()));
+            String previousGuessesSerialized = sharedPreferences.getString(KEY_PREVIOUS_GUESSES, "");
+            previousGuesses = deserializeGuesses(previousGuessesSerialized);
             etGuessInput.setText(sharedPreferences.getString(KEY_INPUT_TEXT, ""));
         } else {
             // Generate a new target word
             targetWord = dict.returnRandomWord();
         }
-
+        gridAdapter = new GuessAdapter(getContext(), previousGuesses);
+        gridPreviousGuesses.setAdapter(gridAdapter);
         gridAdapter.notifyDataSetChanged();
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
@@ -176,6 +176,29 @@ public class GameFragment extends Fragment {
         }
     }
 
+    private String serializeGuesses(ArrayList<String> guesses) {
+        StringBuilder serialized = new StringBuilder();
+        for (String guess : guesses) {
+            serialized.append(guess);
+            serialized.append(",");
+        }
+        return serialized.toString();
+    }
+
+
+    private ArrayList<String> deserializeGuesses(String serialized) {
+        ArrayList<String> guesses = new ArrayList<>();
+        String[] parts = serialized.split(",");
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                guesses.add(part);
+            }
+        }
+        return guesses;
+    }
+
+
+
     @Override
     public void onPause() {
         super.onPause();
@@ -185,7 +208,7 @@ public class GameFragment extends Fragment {
 
         // Save current target word, previous guesses, and current input text
         editor.putString(KEY_TARGET_WORD, targetWord);
-        editor.putStringSet(KEY_PREVIOUS_GUESSES, new HashSet<>(previousGuesses));
+        editor.putString(KEY_PREVIOUS_GUESSES, serializeGuesses(previousGuesses));
         editor.putString(KEY_INPUT_TEXT, etGuessInput.getText().toString());
 
         editor.apply();
