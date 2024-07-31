@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +26,6 @@ public class GameFragment extends Fragment {
 
     private EditText etGuessInput;
     private Button btnSubmitGuess;
-    private TextView tvResult;
     private GridView gridPreviousGuesses;
     private GuessAdapter gridAdapter;
     private String targetWord;
@@ -44,7 +44,6 @@ public class GameFragment extends Fragment {
 
         etGuessInput = view.findViewById(R.id.etGuessInput);
         btnSubmitGuess = view.findViewById(R.id.btnSubmitGuess);
-        tvResult = view.findViewById(R.id.tvResult);
         gridPreviousGuesses = view.findViewById(R.id.gridPreviousGuesses);
 
         // Init
@@ -94,7 +93,7 @@ public class GameFragment extends Fragment {
         @Override
         protected String[] doInBackground(String... params) {
             userGuess = params[0];
-
+            message = null;
             if (userGuess.length() != 5) {
                 message = "Please enter a 5-letter word.";
                 return null;
@@ -102,7 +101,6 @@ public class GameFragment extends Fragment {
                 message = "Invalid word.";
                 return null;
             }
-            message = null; // Reset message
             String[] result = new String[5];
             boolean[] targetWordMatched = new boolean[5]; // Keep track of which letters in the target word have been matched
 
@@ -143,7 +141,7 @@ public class GameFragment extends Fragment {
         protected void onPostExecute(String[] result) {
 
             if (message != null) {
-                tvResult.setText(message);
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                 etGuessInput.setText(""); // Clear input field for the next guess
                 return;
             }
@@ -154,10 +152,8 @@ public class GameFragment extends Fragment {
             gridAdapter.notifyDataSetChanged(); // Notify adapter of data change
 
             if (userGuess.equals(targetWord)) {
-                tvResult.setText("Congratulations! You guessed the word.");
+                Toast.makeText(getContext(), "Congratulations! You guessed the word.", Toast.LENGTH_LONG).show();
                 btnSubmitGuess.setEnabled(false); // Disable submit button after winning
-            } else {
-                tvResult.setText("");
             }
 
             etGuessInput.setText(""); // Clear input field for the next guess
