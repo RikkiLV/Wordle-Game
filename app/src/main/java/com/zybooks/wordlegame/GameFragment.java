@@ -1,5 +1,7 @@
 package com.zybooks.wordlegame;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class GameFragment extends Fragment {
 
@@ -29,6 +32,11 @@ public class GameFragment extends Fragment {
     private String targetWord;
     private ArrayList<String> previousGuesses;
     private Dictionary dict;
+    private static final String PREFS_NAME = "WordleGamePrefs";
+    private static final String KEY_TARGET_WORD = "targetWord";
+    private static final String KEY_PREVIOUS_GUESSES = "previousGuesses";
+    private static final String KEY_INPUT_TEXT = "inputText";
+
 
     @Nullable
     @Override
@@ -49,6 +57,19 @@ public class GameFragment extends Fragment {
         previousGuesses = new ArrayList<>();
         gridAdapter = new GuessAdapter(getContext(), previousGuesses);
         gridPreviousGuesses.setAdapter(gridAdapter);
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        if (sharedPreferences.contains(KEY_TARGET_WORD)) {
+            // Restore saved state
+            targetWord = sharedPreferences.getString(KEY_TARGET_WORD, "");
+            previousGuesses.addAll(sharedPreferences.getStringSet(KEY_PREVIOUS_GUESSES, new HashSet<>()));
+            etGuessInput.setText(sharedPreferences.getString(KEY_INPUT_TEXT, ""));
+        } else {
+            // Generate a new target word
+            targetWord = dict.returnRandomWord();
+        }
+
+        gridAdapter.notifyDataSetChanged();
 
         btnSubmitGuess.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,4 +175,20 @@ public class GameFragment extends Fragment {
             etGuessInput.setText(""); // Clear input field for the next guess
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        // Save current target word, previous guesses, and current input text
+        editor.putString(KEY_TARGET_WORD, targetWord);
+        editor.putStringSet(KEY_PREVIOUS_GUESSES, new HashSet<>(previousGuesses));
+        editor.putString(KEY_INPUT_TEXT, etGuessInput.getText().toString());
+
+        editor.apply();
+    }
+
 }
