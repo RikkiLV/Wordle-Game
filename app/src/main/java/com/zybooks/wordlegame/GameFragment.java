@@ -77,7 +77,8 @@ public class GameFragment extends Fragment {
         // Enter key handling
         etGuessInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                if (btnSubmitGuess.isEnabled()){
+                String userGuess = etGuessInput.getText().toString().toUpperCase();
+                if (userGuess.length() == 5) {
                     submitGuess();
                 }
                 return true;
@@ -87,8 +88,10 @@ public class GameFragment extends Fragment {
 
         Log.i("Wordle", String.valueOf(startTime));
         Log.i("Wordle", targetWord);
+
         return view;
     }
+
 
 
     private void submitGuess() {
